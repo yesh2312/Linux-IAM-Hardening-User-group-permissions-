@@ -1,0 +1,46 @@
+#Step 1: Install auditd
+
+-sudo apt install auditd -y
+
+#Step 2: Create Simple Audit Rules
+
+-sudo nano /etc/audit/rules.d/my-monitoring.rules
+
+#Add these 3 simple lines:
+
+# Watch sudoers files for any changes
+-w /etc/sudoers -p wa -k sudoers_watch
+-w /etc/sudoers.d/ -p wa -k sudoers_watch
+
+# Watch user files for any changes  
+-w /etc/passwd -p wa -k user_watch
+
+#Step 3: Restart auditd
+
+-sudo systemctl restart auditd
+-sudo systemctl enable auditd
+
+#Step 4: Check It's Working
+
+# See your active rules
+-sudo auditctl -l
+
+#Step 5: How to Check for Changes
+
+-sudo ausearch -i
+
+#See only sudoers changes:
+
+-sudo ausearch -k sudoers_watch -i
+
+#See only user file changes:
+
+-sudo ausearch -k user_watch -i
+
+#Step 6: Test It - Make Some Changes
+
+# Create a test user (this will trigger audit)
+-sudo useradd testuser123
+
+# Check what got logged
+-sudo ausearch -k user_watch -i
