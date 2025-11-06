@@ -1,0 +1,72 @@
+Use POSIX permissions + ACLs for a shared project folder so that only the intended group has write access; others have read-only
+
+Implementing Shared Folder Permissions
+
+Step 1: Create the Directory Structure
+
+#create the main application directory
+sudo mkdir -p /opt/myapp
+sudo mkdir -p /opt/myapp/code
+sudo mkdir -p /opt/myapp/config
+
+#create log directory
+sudo mkdir -p /var/log/myapp
+
+#create a test file in code directory  
+sudo touch /opt/myapp/code/main.py
+sudo touch /opt/myapp/config/settings.conf
+
+Step 2: Set Basic POSIX Permissions
+
+# For /opt/myapp - dev group has full access
+sudo chmod -R u=rwx,g=rwx,o= /opt/myapp
+sudo chmod -R g+s /opt/myapp
+
+# For /var/log/myapp - dev group has read-only  
+sudo chmod -R u=rwx,g=rx,o= /var/log/myapp
+sudo chmod -R g+s /var/log/myapp
+
+#verify permissions
+ls -la /opt/
+ls -la /var/log/ | grep myapp
+
+step 3: Test Basic POSIX Permissions
+
+# Test as yesh1_dev (dev group) - should have write access
+sudo -u yesh1_dev touch /opt/myapp/code/test_amit.txt
+sudo -u yesh1_dev ls -la /opt/myapp/code/
+
+# Test as yesh_auditor (auditors group) - should have NO access
+sudo -u yesh_auditor ls -la /opt/myapp/  # This should fail with "Permission denied"
+
+# Clean up test file
+sudo rm /opt/myapp/code/test_amit1.txt
+
+Step 4: Install ACL Support
+
+# Install ACL utilities
+sudo apt update
+sudo apt install acl -y
+
+Step 5: Configure ACLs for Auditor Read Access
+
+We'll give the auditors group read-only access to specific directories without changing the primary group ownership.
+
+# Give auditors group read+execute access to /opt/myapp
+sudo setfacl -R -m g:auditors:rx /opt/myapp
+
+# Give auditors group read access to log files
+sudo setfacl -R -m g:auditors:r /var/log/myapp/
+
+# Set default ACLs for new files in /opt/myapp (inheritance)
+sudo setfacl -R -m d:g:auditors:rx /opt/myapp
+
+Step 6: Verify ACL Configuration
+
+# View ACLs for the directories
+getfacl /opt/myapp
+getfacl /var/log/myapp/
+
+# You should see entries like:
+# group:dev:rwx
+# group:auditors:r-x
