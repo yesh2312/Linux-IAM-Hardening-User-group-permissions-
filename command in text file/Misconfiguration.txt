@@ -1,0 +1,21 @@
+1. World-readable Backup Files
+
+
+# Create backup files with weak permissions
+sudo touch /etc/passwd.backup
+sudo touch /etc/shadow.backup
+sudo chmod 644 /etc/passwd.backup /etc/shadow.backup
+
+2. Insecure Home Directory
+
+# Create a test user with world-readable home
+sudo useradd -m testuser
+sudo chmod 755 /home/testuser  # Should be 700
+sudo touch /home/testuser/secret.txt
+sudo chmod 644 /home/testuser/secret.txt
+
+3. World-writable Log Directory
+
+# Make log directory world-writable
+sudo mkdir -p /var/log/insecure-app
+sudo chmod 777 /var/log/insecure-app  # Very bad!
