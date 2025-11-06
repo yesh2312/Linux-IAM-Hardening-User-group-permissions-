@@ -1,0 +1,73 @@
+Before Remediation Evidence
+
+echo "=== BEFORE: World-readable Backup Files ==="
+- ls -la /etc/*.backup
+
+Remediation Steps
+
+# Remove or secure the backup files
+- sudo chmod 600 /etc/*.backup
+
+# Alternatively, remove them if not needed:
+# sudo rm -f /etc/*.backup
+
+
+After Remediation Evidence
+
+echo "=== AFTER: Secure Backup Files ==="
+- ls -la /etc/*.backup
+
+Finding 2: Insecure Home Directory
+
+Before Remediation Evidence
+
+echo "=== BEFORE: Insecure Home Directory ==="
+- ls -la /home/testuser/
+- ls -la /home/testuser/secret_data.txt
+
+Remediation Steps
+
+# Secure home directory and sensitive files
+sudo chmod 700 /home/testuser
+sudo chmod 600 /home/testuser/secret_data.txt
+sudo chmod 700 /home/testuser/.ssh
+
+# Remove sensitive file if not needed:
+# sudo rm -f /home/testuser/secret_data.txt
+
+
+After Remediation Evidence
+
+echo "=== AFTER: Secure Home Directory ==="
+ls -la /home/testuser/
+ls -la /home/testuser/secret_data.txt
+
+
+Finding 3: World-writable Log Directory
+
+Before Remediation Evidence
+
+echo "=== BEFORE: World-writable Log Directory ==="
+ls -la /var/log/ | grep insecure-app
+ls -la /var/log/insecure-app/
+
+Remediation Steps
+
+# Secure log directory and files
+sudo chmod 755 /var/log/insecure-app
+sudo chmod 644 /var/log/insecure-app/application.log
+sudo chown root:root /var/log/insecure-app/ /var/log/insecure-app/application.log
+
+# Alternatively, remove if not needed:
+# sudo rm -rf /var/log/insecure-app/
+
+After Remediation Evidence
+
+echo "=== AFTER: Secure Log Directory ==="
+ls -la /var/log/ | grep insecure-app
+ls -la /var/log/insecure-app/
+
+Check auditd logs for the changes:
+
+echo "=== AUDIT LOGS: Remediation Activities ==="
+- sudo ausearch -k user_watch -i --start today
